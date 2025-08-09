@@ -1,13 +1,7 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "freertos/queue.h"
-
-#include "waveshare_42in_spi_driver.h"
-#include "timing.h"
+#include "drivers/display/waveshare_42in_spi_driver.h"
+#include "drivers/battery/max17048_i2c_driver.h"
+#include "utils/timing.h"
 
 static WS42_Driver_Config_t SCREEN_CONFIG = {
   .height = 300,
@@ -22,17 +16,23 @@ static WS42_Driver_Config_t SCREEN_CONFIG = {
   .spi_bus = SPI2_HOST,
 };
 
+static max17048_i2c_driver_config_t MAX17048_CONFIG = {
+  .sda_pin = GPIO_NUM_14,
+  .scl_pin = GPIO_NUM_13,
+};
+
 void app_main() {
-  WS42_Driver_Init(&SCREEN_CONFIG);
+  WS42_Driver_Init(SCREEN_CONFIG);
+  max17048_i2c_driver_init(MAX17048_CONFIG);
+
+  printf("Battery Percentage: %d%%\n", max17048_i2c_driver_get_batt_percent());
 
   WAIT_MS(2000);
 
   printf("Black/Red Screen\n");
   WORD Width;
-  WORD Height;
 
   Width = (SCREEN_CONFIG.width % 8 == 0)? (SCREEN_CONFIG.width / 8 ): (SCREEN_CONFIG.width / 8 + 1);
-  Height = SCREEN_CONFIG.height;
 
   WS42_Driver_SendCMD(WS42_Driver_CMD_DATA_BW_START);
   for (WORD j = 0; j < 3; j++) {

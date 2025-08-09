@@ -2,7 +2,7 @@
 
 #include <driver/i2c_master.h>
 #include <soc/gpio_num.h>
-#include <defs.h>
+#include "utils/defs.h"
 
 typedef struct {
   gpio_num_t sda_pin;

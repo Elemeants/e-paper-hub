@@ -2,7 +2,7 @@
 
 #include <driver/gpio.h>
 #include <driver/spi_master.h>
-#include "defs.h"
+#include "utils/defs.h"
 
 typedef enum {
   WS42_Driver_CMD_PANEL_SETTINGS  = 0x00,
@@ -64,7 +64,7 @@ typedef struct {
   spi_host_device_t spi_bus;
 } WS42_Driver_Config_t;
 
-spi_device_handle_t WS42_Driver_Init(WS42_Driver_Config_t*);
+spi_device_handle_t WS42_Driver_Init(const WS42_Driver_Config_t);
 spi_device_interface_config_t WS42_Driver_GetInterfaceConfig(void);
 
 spi_bus_config_t WS42_Driver_getSPIBusConfig(void);

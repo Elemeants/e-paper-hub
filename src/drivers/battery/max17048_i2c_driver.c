@@ -1,5 +1,5 @@
 #include "max17048_i2c_driver.h"
-#include "timing.h"
+#include "utils/timing.h"
 
 static const i2c_device_config_t device_config = {
   .dev_addr_length = I2C_ADDR_BIT_7,
@@ -17,6 +17,9 @@ void max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
     .sda_io_num = dev_config.sda_pin,
     .scl_io_num = dev_config.scl_pin,
     .clk_source = I2C_CLK_SRC_DEFAULT,
+    .flags = {
+      .enable_internal_pullup = 1
+    }
   };
 
   err = i2c_new_master_bus(&bus_config, &bus_handler);

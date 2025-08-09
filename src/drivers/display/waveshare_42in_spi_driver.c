@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "timing.h"
+#include "utils/timing.h"
 
 typedef struct {
   BYTE cmd;
@@ -22,16 +22,15 @@ DRAM_ATTR static const WS42_Driver_Init_CMD_Table_t INIT_TABLE[] = {
     {WS42_Driver_CMD_PANEL_SETTINGS, 1, NOT_WAIT_BUSY, {0x0F}},
 };
 
-static WS42_Driver_Config_t* driver_config = NULL;
+static WS42_Driver_Config_t  driver_config;
 static spi_device_handle_t   screen_spi_handler;
 
 void _WS42_Driver_InitGPIOs(void);
 void _WS42_Driver_ExecInitTable(void);
 void _WS42_Driver_InitSPIDevice(void);
-void _WS42_Driver_SPI_SendByte(const BYTE data, const BYTE data_command,
-                               bool keep_cs_active);
+void _WS42_Driver_SPI_SendByte(const BYTE, const BYTE, bool);
 
-spi_device_handle_t WS42_Driver_Init(WS42_Driver_Config_t* config) {
+spi_device_handle_t WS42_Driver_Init(const WS42_Driver_Config_t config) {
   driver_config = config;
 
   _WS42_Driver_InitGPIOs();
@@ -48,8 +47,8 @@ void WS42_Driver_ClearScreen(void) {
   WORD Width;
   WORD Height;
 
-  Width = (driver_config->width % 8 == 0)? (driver_config->width / 8 ): (driver_config->width / 8 + 1);
-  Height = driver_config->height;
+  Width = (driver_config.width % 8 == 0)? (driver_config.width / 8 ): (driver_config.width / 8 + 1);
+  Height = driver_config.height;
 
   WS42_Driver_SendCMD(WS42_Driver_CMD_DATA_BW_START);
   for (WORD j = 0; j < Height; j++) {
@@ -70,11 +69,11 @@ void WS42_Driver_ClearScreen(void) {
 }
 
 void WS42_Driver_HardReset(void) {
-  gpio_set_level(driver_config->gpio_rst_pin, 1);
+  gpio_set_level(driver_config.gpio_rst_pin, 1);
   WAIT_MS(200);
-  gpio_set_level(driver_config->gpio_rst_pin, 0);
+  gpio_set_level(driver_config.gpio_rst_pin, 0);
   WAIT_MS(10);
-  gpio_set_level(driver_config->gpio_rst_pin, 1);
+  gpio_set_level(driver_config.gpio_rst_pin, 1);
   WAIT_MS(200);
   WS42_Driver_WaitForBusyAck();
 }
@@ -83,31 +82,27 @@ void WS42_Driver_WaitForBusyAck() {
   do {
     WS42_Driver_SendCMD(WS42_Driver_CMD_GET_BUSY);
     WAIT_MS(20);
-  } while(!(gpio_get_level(driver_config->gpio_busy_pin)));
+  } while(!(gpio_get_level(driver_config.gpio_busy_pin)));
   WAIT_MS(20);
 }
 
 void _WS42_Driver_InitGPIOs(void) {
-  if (!driver_config) {
-    return;
-  }
-
   gpio_config_t pin;
   pin.intr_type = GPIO_INTR_DISABLE, pin.mode = GPIO_MODE_OUTPUT,
-  pin.pull_up_en = ENABLE, pin.pin_bit_mask = _BIT(driver_config->gpio_rst_pin),
+  pin.pull_up_en = ENABLE, pin.pin_bit_mask = _BIT(driver_config.gpio_rst_pin),
   gpio_config(&pin);
 
   pin.intr_type = GPIO_INTR_DISABLE, pin.mode = GPIO_MODE_OUTPUT,
-  pin.pin_bit_mask = _BIT(driver_config->gpio_dc_pin), gpio_config(&pin);
+  pin.pin_bit_mask = _BIT(driver_config.gpio_dc_pin), gpio_config(&pin);
 
   pin.intr_type = GPIO_INTR_DISABLE;
   pin.mode = GPIO_MODE_INPUT;
   pin.pull_down_en = DISABLE;
   pin.pull_up_en = DISABLE;
-  pin.pin_bit_mask = _BIT(driver_config->gpio_busy_pin), gpio_config(&pin);
+  pin.pin_bit_mask = _BIT(driver_config.gpio_busy_pin), gpio_config(&pin);
 
-  gpio_set_level(driver_config->gpio_rst_pin, 1);
-  gpio_set_level(driver_config->gpio_dc_pin, 0);
+  gpio_set_level(driver_config.gpio_rst_pin, 1);
+  gpio_set_level(driver_config.gpio_dc_pin, 0);
 }
 
 void _WS42_Driver_ExecInitTable(void) {
@@ -128,8 +123,7 @@ void _WS42_Driver_ExecInitTable(void) {
   WS42_Driver_WaitForBusyAck();
 }
 
-void _WS42_Driver_SPI_SendByte(const BYTE data, const BYTE data_command,
-                               bool keep_cs_active) {
+void _WS42_Driver_SPI_SendByte(const BYTE data, const BYTE data_command, bool keep_cs_active) {
   esp_err_t error;
   spi_transaction_t t;
   memset(&t, 0, sizeof(t));
@@ -171,9 +165,9 @@ void WS42_Driver_DrawBuffer(WORD pos_x, WORD pos_y, BYTE* buffer,
 }
 
 spi_bus_config_t WS42_Driver_getSPIBusConfig(void) {
-  spi_bus_config_t buscfg = {.miso_io_num = driver_config->spi_miso_pin,
-                             .mosi_io_num = driver_config->spi_mosi_pin,
-                             .sclk_io_num = driver_config->spi_clk_pin,
+  spi_bus_config_t buscfg = {.miso_io_num = driver_config.spi_miso_pin,
+                             .mosi_io_num = driver_config.spi_mosi_pin,
+                             .sclk_io_num = driver_config.spi_clk_pin,
                              .quadwp_io_num = -1,
                              .quadhd_io_num = -1,
                              .flags = SPICOMMON_BUSFLAG_SLAVE};
@@ -182,14 +176,14 @@ spi_bus_config_t WS42_Driver_getSPIBusConfig(void) {
 
 void IRAM_ATTR __handle_data_command_pre_transmision(spi_transaction_t* trans) {
   int dc = (int)trans->user;
-  gpio_set_level(driver_config->gpio_dc_pin, dc);
+  gpio_set_level(driver_config.gpio_dc_pin, dc);
 }
 
 spi_device_interface_config_t WS42_Driver_getSPIDeviceConfig(void) {
   spi_device_interface_config_t devcfg = {
       .clock_speed_hz = _MHZ(1),
       .mode = 0,
-      .spics_io_num = driver_config->spi_cs_pin,
+      .spics_io_num = driver_config.spi_cs_pin,
       .queue_size = 12,
       .pre_cb = __handle_data_command_pre_transmision,
   };
@@ -202,9 +196,9 @@ void _WS42_Driver_InitSPIDevice(void) {
   spi_device_handle_t spi;
   esp_err_t ret;
 
-  ret = spi_bus_initialize(driver_config->spi_bus, &buscfg, SPI_DMA_DISABLED);
+  ret = spi_bus_initialize(driver_config.spi_bus, &buscfg, SPI_DMA_DISABLED);
   ESP_ERROR_CHECK(ret);
-  ret = spi_bus_add_device(driver_config->spi_bus, &devcfg, &spi);
+  ret = spi_bus_add_device(driver_config.spi_bus, &devcfg, &spi);
   ESP_ERROR_CHECK(ret);
   screen_spi_handler = spi;
 }
