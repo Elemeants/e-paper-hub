@@ -1,3 +1,11 @@
+/**
+ * @file main.c
+ * @author jdanypa@gmail.com (Elemeants)
+ * @brief Main application file
+ *
+ * This file contains the main application logic for the InkPortrait project.
+ * It initializes the Waveshare 4.2 inch SPI display and the MAX17048 battery driver.
+ */
 #include <stdio.h>
 #include "drivers/display/waveshare_42in_spi_driver.h"
 #include "drivers/battery/max17048_i2c_driver.h"
@@ -22,43 +30,43 @@ static max17048_i2c_driver_config_t MAX17048_CONFIG = {
 };
 
 void app_main() {
-  WS42_Driver_Init(SCREEN_CONFIG);
+  ws42_driver_init(SCREEN_CONFIG);
   max17048_i2c_driver_init(MAX17048_CONFIG);
 
   printf("Battery Percentage: %d%%\n", max17048_i2c_driver_get_batt_percent());
 
-  WAIT_MS(2000);
+  sleep_ms(2000);
 
   printf("Black/Red Screen\n");
   WORD Width;
 
   Width = (SCREEN_CONFIG.width % 8 == 0)? (SCREEN_CONFIG.width / 8 ): (SCREEN_CONFIG.width / 8 + 1);
 
-  WS42_Driver_SendCMD(WS42_Driver_CMD_DATA_BW_START);
+  ws42_driver_send_command(WS42_Driver_CMD_DATA_BW_START);
   for (WORD j = 0; j < 3; j++) {
       for (WORD i = 0; i < Width; i++) {
-          WS42_Driver_SendDataByte(0x0F);
+          ws42_driver_send_data(0x0F);
       }
   }
-  WS42_Driver_SendCMD(WS42_Driver_CMD_DATA_RED_START);
+  ws42_driver_send_command(WS42_Driver_CMD_DATA_RED_START);
   for (WORD j = 0; j < 3; j++) {
       for (WORD i = 0; i < Width; i++) {
-          WS42_Driver_SendDataByte(0x00);
+          ws42_driver_send_data(0x00);
       }
   }
   for (WORD j = 3; j < 6; j++) {
       for (WORD i = 0; i < Width; i++) {
-          WS42_Driver_SendDataByte(0xF0);
+          ws42_driver_send_data(0xF0);
       }
   }
 
-  WS42_Driver_SendCMD(WS42_Driver_CMD_DISPLAY_REFRESH);
-  WAIT_MS(200);
-  WS42_Driver_WaitForBusyAck();
-  WAIT_MS(2000);
+  ws42_driver_send_command(WS42_Driver_CMD_DISPLAY_REFRESH);
+  sleep_ms(200);
+  ws42_driver_wait_busy_ack();
+  sleep_ms(2000);
 
   printf("Finished\n");
   while(1) {
-    WAIT_MS(100);
+    sleep_ms(100);
   }
 }

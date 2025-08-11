@@ -1,14 +1,25 @@
+/**
+ * @file max17048_i2c_driver.c
+ * @author jdanypa@gmail.com (Elemeants)
+ */
 #include "max17048_i2c_driver.h"
 #include "utils/timing.h"
 
+/**
+ * @brief I2C device configuration for MAX17048
+ */
 static const i2c_device_config_t device_config = {
   .dev_addr_length = I2C_ADDR_BIT_7,
-  .device_address = 0x36,
-  .scl_speed_hz = _KHZ(100),
+  .device_address = 0x36,     // Default I2C address for MAX17048.
+  .scl_speed_hz = _KHZ(100),  // 100 kHz I2C speed
 };
+
+/** Private variables */
 
 static i2c_master_dev_handle_t dev_handler;
 static i2c_master_bus_handle_t bus_handler;
+
+/** Public function declarations */
 
 void max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
   esp_err_t err;
