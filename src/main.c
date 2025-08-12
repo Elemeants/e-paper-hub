@@ -10,6 +10,7 @@
 #include "drivers/display/waveshare_42in_spi_driver.h"
 #include "drivers/battery/max17048_i2c_driver.h"
 #include "utils/timing.h"
+#include "screen/renderer.h"
 
 static WS42_Driver_Config_t SCREEN_CONFIG = {
   .height = 300,
@@ -44,42 +45,25 @@ void app_main() {
   printf(" Firmware Version: %s\n", FIRMWARE_VERSION);
   printf(" Build time: %u\n", BUILD_TIME_UNIX);
 
-  ws42_driver_init(SCREEN_CONFIG);
+  // Driver inits
   max17048_i2c_driver_init(MAX17048_CONFIG);
+  ws42_driver_init(SCREEN_CONFIG);
 
+  // Frame buffer and renderer init
+  graphics_frame_buffer_t frame_buffer = graphics_frame_buffer_create(SCREEN_CONFIG.width, SCREEN_CONFIG.height);
+  graphics_renderer_attach(&frame_buffer);
+  graphics_frame_buffer_clear(&frame_buffer, GRAPHICS_COLOR_WHITE);
+
+  // Do something
   printf("Battery Percentage: %d%%\n", max17048_i2c_driver_get_batt_percent());
-
-  sleep_ms(2000);
-
   printf("Black/Red Screen\n");
-  WORD Width;
+  const WORD step = frame_buffer.height / 3;
+  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, 0, frame_buffer.width, step, GRAPHICS_COLOR_BLACK);
+  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, step, frame_buffer.width, frame_buffer.height - step, GRAPHICS_COLOR_WHITE);
+  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, frame_buffer.height - step, frame_buffer.width, frame_buffer.height, GRAPHICS_COLOR_RED);
 
-  Width = (SCREEN_CONFIG.width % 8 == 0)? (SCREEN_CONFIG.width / 8 ): (SCREEN_CONFIG.width / 8 + 1);
+  graphics_renderer_update();
 
-  ws42_driver_send_command(WS42_Driver_CMD_DATA_BW_START);
-  for (WORD j = 0; j < 3; j++) {
-      for (WORD i = 0; i < Width; i++) {
-          ws42_driver_send_data(0x0F);
-      }
-  }
-  ws42_driver_send_command(WS42_Driver_CMD_DATA_RED_START);
-  for (WORD j = 0; j < 3; j++) {
-      for (WORD i = 0; i < Width; i++) {
-          ws42_driver_send_data(0x00);
-      }
-  }
-  for (WORD j = 3; j < 6; j++) {
-      for (WORD i = 0; i < Width; i++) {
-          ws42_driver_send_data(0xF0);
-      }
-  }
-
-  ws42_driver_send_command(WS42_Driver_CMD_DISPLAY_REFRESH);
-  sleep_ms(200);
-  ws42_driver_wait_busy_ack();
-  sleep_ms(2000);
-
-  printf("Finished\n");
   while(1) {
     sleep_ms(100);
   }
