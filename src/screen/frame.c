@@ -36,6 +36,31 @@ static inline uint8_t _ensure_bounds(WORD x1, WORD y1, WORD x2, WORD y2,
   return 1;  // Within bounds
 }
 
+static inline void _graphics_frame_buffer_draw_bitmap(graphics_frame_buffer_t *frame_buffer,
+                                      WORD x, WORD y,
+                                      const uint8_t *data, WORD width, WORD height,
+                                      graphics_color_e color, int invert) {
+  for (WORD row = 0; row < height; row++) {
+    for (WORD col = 0; col < width; col++) {
+      const uint32_t col_font_idx = (col / 8);
+      const uint16_t byte_index = (row * BIT_CAPACITY(width)) + col_font_idx;
+      uint8_t font_bitmask = data[byte_index];
+      if (invert) {
+          font_bitmask = ~font_bitmask;
+      }
+
+      const uint8_t bit = (font_bitmask & (1 << (7 - (col % 8)))) != 0;
+
+      if (!bit) {
+        continue;  // Skip if the pixel is not set
+      }
+
+      graphics_frame_buffer_draw_pixel(frame_buffer, x + col, y + row, color);
+    }
+  }
+}
+
+
 /** Public functions */
 
 graphics_frame_buffer_t graphics_frame_buffer_create(WORD width, WORD height) {
@@ -134,21 +159,15 @@ void graphics_frame_buffer_draw_text(graphics_frame_buffer_t *frame_buffer,
   for (const char *p = text; *p != '\0'; p++) {
     const char c = *p;
     const uint8_t* data = font16_get_entry(*p);
-    for (WORD row = 0; row < font_16.c_height; row++) {
-      for (WORD col = 0; col < font_16.c_width; col++) {
-        const uint32_t col_font_idx = (col / 8);
-        const uint16_t byte_index = (row * BIT_CAPACITY(font_16.c_width)) + col_font_idx;
-        const uint8_t font_bitmask = data[byte_index];
-        const uint8_t bit = (font_bitmask & (1 << (7 - (col % 8)))) != 0;
-
-        if (!bit) {
-          continue;  // Skip if the pixel is not set
-        }
-
-        graphics_frame_buffer_draw_pixel(frame_buffer, _x + col, y + row, color);
-      }
-    }
-
+    _graphics_frame_buffer_draw_bitmap(frame_buffer, _x, y, data,
+                                      font_16.c_width, font_16.c_height, color, 0);
     _x += font_16.c_width;
   }
+}
+
+void graphics_frame_buffer_draw_bitmap(graphics_frame_buffer_t *frame_buffer,
+                                      WORD x, WORD y,
+                                      const uint8_t *data, WORD width, WORD height,
+                                      graphics_color_e color) {
+  _graphics_frame_buffer_draw_bitmap(frame_buffer, x, y, data, width, height, color, 1);
 }

@@ -121,7 +121,13 @@ void graphics_frame_buffer_fill_rectangle(graphics_frame_buffer_t *frame_buffer,
  */
 void dump_graphics_frame_buffer(const graphics_frame_buffer_t *frame_buffer);
 
-// TODO: Later implementation
 void graphics_frame_buffer_draw_text(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, const char *text, graphics_color_e color);
+
+void graphics_frame_buffer_draw_bitmap(graphics_frame_buffer_t *frame_buffer,
+                                      WORD x, WORD y,
+                                      const uint8_t *data, WORD width, WORD height,
+                                      graphics_color_e color);
+
+// TODO: Later implementation
 void graphics_frame_buffer_draw_circle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD radius, graphics_color_e color);
 void graphics_frame_buffer_fill_circle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD radius, graphics_color_e color);
