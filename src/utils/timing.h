@@ -9,6 +9,7 @@
 #pragma once
 
 #include <esp_timer.h>
+#include <freertos/FreeRTOS.h>
 
 /**
  * @brief Wait for a specified number of milliseconds

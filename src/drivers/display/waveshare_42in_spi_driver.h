@@ -189,3 +189,10 @@ void ws42_driver_send_command(WS42_Driver_CMD_e);
  * @note This function sends a data byte to the display using the SPI interface, and sets the DC pin to HIGH.
  */
 void ws42_driver_send_data(BYTE);
+
+/**
+ * @brief Sends a data buffer to the display.
+ *
+ * @note This function sends a data buffer to the display using the SPI interface, and sets the DC pin to HIGH.
+ */
+void ws42_driver_send_data_buffer(BYTE* data, WORD data_length);

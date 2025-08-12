@@ -54,6 +54,12 @@ There are two versions of the display driver; new and old. This project uses the
    - Finally, send the `0x12` command to update the display with the new buffer.
    - Wait for the busy pin to go low again.
 
+### Displaying an image
+
+The device buffer is structured as: ROW_0, ROW_1, ..., ROW_`HEIGHT-1`, where each row contains `WIDTH` pixels. Each pixel is represented by a single byte, where the bits represent the color of the pixel.
+
+The screen has two color registers: Black/White and a separate Red register. And as described in the initialization sequence above, the data polarity is build from both registers to determine the pixel color.
+
 ## Resources
 
 - [Datasheet](https://www.waveshare.net/w/upload/8/88/UC8176.pdf)
