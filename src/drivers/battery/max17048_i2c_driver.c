@@ -18,6 +18,7 @@ static const i2c_device_config_t device_config = {
 
 static i2c_master_dev_handle_t dev_handler;
 static i2c_master_bus_handle_t bus_handler;
+static uint8_t init_status = 0x1;
 
 /** Public function declarations */
 
@@ -39,13 +40,22 @@ void max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
   ESP_ERROR_CHECK(err);
 
   err = i2c_master_probe(bus_handler, device_config.device_address, 2000);
-  ESP_ERROR_CHECK(err);
+  if (err != ESP_OK) {
+    init_status = 0;
+    printf("MAX17048 not found at address 0x%02X, disabling this feature!\n", device_config.device_address);
+    return;
+  }
 }
 
 BYTE max17048_i2c_driver_get_batt_percent(void) {
   esp_err_t err;
   BYTE raw_percent = 0;
   BYTE cmd = MAX17048_REG_SOC;
+
+  if (init_status == 0) {
+    printf("MAX17048 not initialized, cannot get battery percentage.\n");
+    return 0;
+  }
 
   err = i2c_master_transmit_receive(dev_handler, &cmd, 1, &raw_percent, 1, 1000);
   ESP_ERROR_CHECK(err);
