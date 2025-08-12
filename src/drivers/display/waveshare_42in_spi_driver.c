@@ -143,7 +143,6 @@ spi_device_handle_t ws42_driver_init(const WS42_Driver_Config_t config) {
   ws42_driver_hard_reset();
   sleep_ms(1000);
   _ws42_driver_exec_init_table();
-  ws42_driver_ops_clear_screen();
 
   return screen_spi_handler;
 }

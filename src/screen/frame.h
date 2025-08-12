@@ -33,8 +33,8 @@ typedef struct {
  * This enum defines a set of colors that can be used for drawing operations.
  */
 typedef enum {
-  GRAPHICS_COLOR_WHITE,
   GRAPHICS_COLOR_BLACK,
+  GRAPHICS_COLOR_WHITE,
   GRAPHICS_COLOR_RED,
 } graphics_color_e;
 

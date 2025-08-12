@@ -56,11 +56,15 @@ void app_main() {
 
   // Do something
   printf("Battery Percentage: %d%%\n", max17048_i2c_driver_get_batt_percent());
-  printf("Black/Red Screen\n");
-  const WORD step = frame_buffer.height / 3;
-  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, 0, frame_buffer.width, step, GRAPHICS_COLOR_BLACK);
-  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, step, frame_buffer.width, frame_buffer.height - step, GRAPHICS_COLOR_WHITE);
-  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, frame_buffer.height - step, frame_buffer.width, frame_buffer.height, GRAPHICS_COLOR_RED);
+  // printf("Black/Red Screen\n");
+  // const WORD step = frame_buffer.height / 3;
+  // graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, 0, frame_buffer.width, step, GRAPHICS_COLOR_BLACK);
+  // graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, step, frame_buffer.width, frame_buffer.height - step, GRAPHICS_COLOR_WHITE);
+  // graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, frame_buffer.height - step, frame_buffer.width, frame_buffer.height, GRAPHICS_COLOR_RED);
+
+  printf("Drawing the hub\n");
+  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, 20, frame_buffer.width, 1, GRAPHICS_COLOR_BLACK);
+  graphics_frame_buffer_draw_text(&frame_buffer, 0, 2, "Hello world! Its 9:35 PM (100%)\0", GRAPHICS_COLOR_BLACK);
 
   graphics_renderer_update();
 

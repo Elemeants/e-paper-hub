@@ -37,3 +37,11 @@
  * @return The number of elements in the array
  */
 #define ARRAY_SIZE(__ARRAY__) (sizeof(__ARRAY__)/sizeof(__ARRAY__[0]))
+
+/**
+ * @brief Calculate the number of bytes required to store a given number of bits.
+ *
+ * @param __BITS__ The number of bits
+ * @return The number of bytes required to store the bits
+ */
+#define BIT_CAPACITY(__BITS__) ((__BITS__ % 8 == 0) ? (__BITS__ / 8) : ((__BITS__ / 8) + 1))

@@ -5,6 +5,7 @@
 #include "frame.h"
 
 #include "utils/timing.h"
+#include "fonts/fonts.h"
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
@@ -29,7 +30,7 @@ static inline int16_t _math_calculate_slope_points(WORD x1, WORD y1, WORD x2,
 
 static inline uint8_t _ensure_bounds(WORD x1, WORD y1, WORD x2, WORD y2,
                                      WORD width, WORD height) {
-  if (x1 >= width || y1 >= height || x2 >= width || y2 >= height) {
+  if (x1 > width || y1 > height || x2 > width || y2 > height) {
     return 0;  // Out of bounds
   }
   return 1;  // Within bounds
@@ -124,4 +125,30 @@ void dump_graphics_frame_buffer(const graphics_frame_buffer_t *frame_buffer) {
     sleep_ms(10);  // Sleep to avoid flooding the console
   }
   printf("\n");
+}
+
+void graphics_frame_buffer_draw_text(graphics_frame_buffer_t *frame_buffer,
+                                     WORD x, WORD y, const char *text,
+                                     graphics_color_e color) {
+  WORD _x = x;
+  for (const char *p = text; *p != '\0'; p++) {
+    const char c = *p;
+    const uint8_t* data = font16_get_entry(*p);
+    for (WORD row = 0; row < font_16.c_height; row++) {
+      for (WORD col = 0; col < font_16.c_width; col++) {
+        const uint32_t col_font_idx = (col / 8);
+        const uint16_t byte_index = (row * BIT_CAPACITY(font_16.c_width)) + col_font_idx;
+        const uint8_t font_bitmask = data[byte_index];
+        const uint8_t bit = (font_bitmask & (1 << (7 - (col % 8)))) != 0;
+
+        if (!bit) {
+          continue;  // Skip if the pixel is not set
+        }
+
+        graphics_frame_buffer_draw_pixel(frame_buffer, _x + col, y + row, color);
+      }
+    }
+
+    _x += font_16.c_width;
+  }
 }
