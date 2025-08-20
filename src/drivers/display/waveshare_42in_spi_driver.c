@@ -43,8 +43,7 @@ static spi_bus_config_t ws42_driver_get_spi_bus_config(void) {
                              .sclk_io_num = driver_config.spi_clk_pin,
                              .quadwp_io_num = -1,
                              .quadhd_io_num = -1,
-                             .max_transfer_sz = 16384,
-                             .flags = SPICOMMON_BUSFLAG_SLAVE};
+                             .max_transfer_sz = 16384};
   return buscfg;
 }
 

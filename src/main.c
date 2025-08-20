@@ -11,9 +11,11 @@
 
 #include "drivers/battery/max17048_i2c_driver.h"
 #include "drivers/display/waveshare_42in_spi_driver.h"
+#include "drivers/sdcard/sd_spi_driver.h"
 #include "screen/renderer.h"
 #include "utils/timing.h"
 #include "test_image.h"
+#include "esp_log.h"
 
 static WS42_Driver_Config_t SCREEN_CONFIG = {
     .height = 300,
@@ -31,6 +33,14 @@ static WS42_Driver_Config_t SCREEN_CONFIG = {
 static max17048_i2c_driver_config_t MAX17048_CONFIG = {
     .sda_pin = GPIO_NUM_14,
     .scl_pin = GPIO_NUM_13,
+};
+
+static sdcard_driver_config_t SDCARD_CONFIG = {
+  .host = SPI3_HOST,
+  .clk_pin = GPIO_NUM_5,
+  .mosi_pin = GPIO_NUM_17,
+  .miso_pin = GPIO_NUM_16,
+  .cs_pin = GPIO_NUM_18,
 };
 
 static char *LOGO =
@@ -51,8 +61,9 @@ void app_main() {
   // Driver inits
   max17048_i2c_driver_init(MAX17048_CONFIG);
   ws42_driver_init(SCREEN_CONFIG);
+  sdcard_driver_init(SDCARD_CONFIG);
 
-  // Frame buffer and renderer init
+  // Frame buffer and renderer in it
   graphics_frame_buffer_t frame_buffer =
       graphics_frame_buffer_create(SCREEN_CONFIG.width, SCREEN_CONFIG.height);
   graphics_renderer_attach(&frame_buffer);
