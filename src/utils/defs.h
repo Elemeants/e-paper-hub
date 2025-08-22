@@ -10,12 +10,6 @@
 
 #include <stdint.h>
 
-// Define common data types for better readability and portability
-
-#define BYTE uint8_t
-#define WORD uint16_t
-#define DWORD uint32_t
-
 // Bit manipulation macros
 
 #define _BIT(__BIT__) (1 << __BIT__)

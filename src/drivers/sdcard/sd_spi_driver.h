@@ -25,6 +25,7 @@ typedef struct {
     gpio_num_t cs_pin;   /*!< Chip select pin for the SD card */
 } sdcard_driver_config_t;
 
+extern const char* SD_VFS_MOUNTING_POINT;
 
 /**
  * @brief Initializes the SD card driver with the specified configuration.
@@ -34,4 +35,4 @@ typedef struct {
  *
  * @param config The configuration structure containing initialization parameters for the SD card driver.
  */
-void sdcard_driver_init(const sdcard_driver_config_t config);
+uint8_t sdcard_driver_init(const sdcard_driver_config_t config);

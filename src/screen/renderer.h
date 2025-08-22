@@ -7,6 +7,12 @@
 
 #include "frame.h"
 
+#define CALC_INTERNAL_WIDTH ((SCREEN_WIDTH % 8 == 0) ? (SCREEN_WIDTH / 8) : (SCREEN_WIDTH / 8 + 1))
+#define CALC_INTERNAL_HEIGH (SCREEN_HEIGHT)
+
+#define SCREEN_HEIGHT 300
+#define SCREEN_WIDTH 400
+
 /**
  * @brief Attaches a graphics frame buffer to the renderer.
  *

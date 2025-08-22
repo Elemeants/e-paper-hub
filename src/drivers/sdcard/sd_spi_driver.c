@@ -16,9 +16,11 @@
 
 static const char TAG[] = "sd_spi_driver";
 static sdcard_driver_config_t sdcard_config;
-static sdspi_dev_handle_t sdcard_handle;
 static sdmmc_card_t *sdcard_card = NULL;
-static const char MOUTING_POINT[] = {"/sdcard"};
+
+/** Public variables */
+
+const char* SD_VFS_MOUNTING_POINT = "/sdcard";
 
 /** Private functions */
 
@@ -44,11 +46,11 @@ static void _spi_device_initialize() {
   sd_dev_config.gpio_cs = sdcard_config.cs_pin;
 
   esp_vfs_fat_sdmmc_mount_config_t mount_config = VFS_FAT_MOUNT_DEFAULT_CONFIG();
-  mount_config.format_if_mount_failed = true;
+  mount_config.format_if_mount_failed = false;
   mount_config.max_files = 5;
   mount_config.allocation_unit_size = 0;
 
-  esp_err_t ret = esp_vfs_fat_sdspi_mount(MOUTING_POINT, &host_config, &sd_dev_config, &mount_config, &sdcard_card);
+  esp_err_t ret = esp_vfs_fat_sdspi_mount(SD_VFS_MOUNTING_POINT, &host_config, &sd_dev_config, &mount_config, &sdcard_card);
 
   if (ret != ESP_OK) {
     if (ret == ESP_FAIL) {
@@ -67,14 +69,15 @@ static void _spi_device_initialize() {
 
 /** Public functions */
 
-void sdcard_driver_init(const sdcard_driver_config_t config) {
+uint8_t sdcard_driver_init(const sdcard_driver_config_t config) {
   sdcard_config = config;
 
   _spi_bus_initialize();
   _spi_device_initialize();
   if (!sdcard_card) {
-    return;
+    return ESP_FAIL;
   }
 
   sdmmc_card_print_info(stdout, sdcard_card);
+  return ESP_OK;
 }

@@ -16,10 +16,12 @@
 #include "utils/timing.h"
 #include "test_image.h"
 #include "esp_log.h"
+#include "hub.h"
 
-static WS42_Driver_Config_t SCREEN_CONFIG = {
-    .height = 300,
-    .width = 400,
+static const e_paper_hub_peripherals_config_t global_device_configs = {
+  .screen_config = {
+    .height = SCREEN_HEIGHT,
+    .width = SCREEN_WIDTH,
     .spi_clk_pin = GPIO_NUM_19,
     .spi_mosi_pin = GPIO_NUM_23,
     .spi_miso_pin = GPIO_NUM_25,
@@ -28,62 +30,28 @@ static WS42_Driver_Config_t SCREEN_CONFIG = {
     .gpio_rst_pin = GPIO_NUM_26,
     .gpio_dc_pin = GPIO_NUM_27,
     .spi_bus = SPI2_HOST,
-};
-
-static max17048_i2c_driver_config_t MAX17048_CONFIG = {
+  },
+  .sdcard_config = {
+    .host = SPI3_HOST,
+    .clk_pin = GPIO_NUM_5,
+    .mosi_pin = GPIO_NUM_17,
+    .miso_pin = GPIO_NUM_16,
+    .cs_pin = GPIO_NUM_18,
+  },
+  .battery_reader_config = {
     .sda_pin = GPIO_NUM_14,
     .scl_pin = GPIO_NUM_13,
+  }
 };
 
-static sdcard_driver_config_t SDCARD_CONFIG = {
-  .host = SPI3_HOST,
-  .clk_pin = GPIO_NUM_5,
-  .mosi_pin = GPIO_NUM_17,
-  .miso_pin = GPIO_NUM_16,
-  .cs_pin = GPIO_NUM_18,
-};
-
-static char *LOGO =
-    "  _____                      _    _       _     \n"
-    "  |  __ \\                    | |  | |     | |    \n"
-    "  | |__) |_ _ _ __   ___ _ __| |__| |_   _| |__  \n"
-    "  |  ___/ _` | '_ \\ / _ \\ '__|  __  | | | | '_ \\ \n"
-    "  | |  | (_| | |_) |  __/ |  | |  | | |_| | |_) |\n"
-    "  |_|   \\__,_| .__/ \\___|_|  |_|  |_|\\__,_|_.__/ \n"
-    "              | |                                \n"
-    "              |_|                                \n";
 
 void app_main() {
-  printf(LOGO);
-  printf(" Firmware Version: %s\n", FIRMWARE_VERSION);
-  printf(" Build time: %u\n", BUILD_TIME_UNIX);
+  hub_initialize(global_device_configs);
 
-  // Driver inits
-  max17048_i2c_driver_init(MAX17048_CONFIG);
-  ws42_driver_init(SCREEN_CONFIG);
-  sdcard_driver_init(SDCARD_CONFIG);
-
-  // Frame buffer and renderer in it
-  graphics_frame_buffer_t frame_buffer =
-      graphics_frame_buffer_create(SCREEN_CONFIG.width, SCREEN_CONFIG.height);
-  graphics_renderer_attach(&frame_buffer);
-  graphics_frame_buffer_clear(&frame_buffer, GRAPHICS_COLOR_WHITE);
-
-  // Do something
   printf("Battery Percentage: %d%%\n", max17048_i2c_driver_get_batt_percent());
-  printf("Drawing the hub\n");
-  graphics_frame_buffer_fill_rectangle(&frame_buffer, 0, 20, frame_buffer.width,
-                                       1, GRAPHICS_COLOR_BLACK);
-  graphics_frame_buffer_draw_text(&frame_buffer, 0, 2,
-                                  "Hello world! Its 9:35 PM (100%)\0",
-                                  GRAPHICS_COLOR_BLACK);
-
-  graphics_frame_buffer_draw_bitmap(&frame_buffer, 0, 21,
-                                      test_image, test_image_width,
-                                      test_image_height, GRAPHICS_COLOR_BLACK);
-  graphics_renderer_update();
 
   while (1) {
-    sleep_ms(100);
+    hub_render_next_image();
+    sleep_ms(10000);
   }
 }

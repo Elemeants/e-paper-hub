@@ -11,7 +11,7 @@
  *
  * Initialization example:
  * ```c
- * WS42_Driver_Config_t config = {
+ * ws42_driver_config_t config = {
  *   // Set the width and height according to your display's specifications
  *   .width = 400,
  *   .height = 300,
@@ -81,7 +81,7 @@ typedef enum {
   WS42_Driver_CMD_POWER_SAVING    = 0xE3,
   WS42_Driver_CMD_LPD_SELECT      = 0xE4,
   WS42_Driver_CMD_FORCE_TEMP      = 0xE5,
-} WS42_Driver_CMD_e;
+} ws42_driver_cmd_e;
 
 /**
  * @brief Structure that defines the screen dimensions and GPIO pin configuration for the ESP32 SPI interface.
@@ -90,12 +90,12 @@ typedef struct {
   /**
    * @brief Width of the display in pixels
    */
-  WORD width;
+  uint16_t width;
 
   /**
    * @brief Height of the display in pixels
    */
-  WORD height;
+  uint16_t height;
 
   /**
    * @brief GPIO pin connected to the SPI MISO (Master In Slave Out) line
@@ -142,20 +142,20 @@ typedef struct {
    * @brief SPI bus to use for communication with the display, typically SPI2_HOST on the ESP32.
    */
   spi_host_device_t spi_bus;
-} WS42_Driver_Config_t;
+} ws42_driver_config_t;
 
 /**
  * @brief Initializes the WS42 display driver with the specified configuration.
  *
  * This function sets up the SPI bus (See `WS42_Driver_getSPIBusConfig`, and `WS42_Driver_getSPIDeviceConfig`)
- * and configures the GPIO pins according to the provided `WS42_Driver_Config_t` structure.
+ * and configures the GPIO pins according to the provided `ws42_driver_config_t` structure.
  *
  * Then it performs a hardware reset of the display, waits for it to become ready, and starts the initialization
  * sequence.
  *
- * @return spi_device_handle_t Returns the SPI device handle.
+ * @return uint8_t Returns the initialization status
  */
-spi_device_handle_t ws42_driver_init(const WS42_Driver_Config_t);
+uint8_t ws42_driver_init(const ws42_driver_config_t);
 
 /**
  * @brief Waits for the display to become ready for the next command.
@@ -167,7 +167,7 @@ void ws42_driver_wait_busy_ack(void);
 /**
  * @brief Performs a hardware reset of the display.
  * 
- * @note This function sets the `WS42_Driver_Config_t#gpio_rst_pin` to low for a short period.
+ * @note This function sets the `ws42_driver_config_t#gpio_rst_pin` to low for a short period.
  */
 void ws42_driver_hard_reset(void);
 
@@ -177,22 +177,22 @@ void ws42_driver_hard_reset(void);
 void ws42_driver_ops_clear_screen(void);
 
 /**
- * @brief Sends a WS42_Driver_CMD_e command to the display.
+ * @brief Sends a ws42_driver_cmd_e command to the display.
  *
  * @note This function sends a command byte to the display using the SPI interface, and sets the DC pin to LOW.
  */
-void ws42_driver_send_command(WS42_Driver_CMD_e);
+void ws42_driver_send_command(ws42_driver_cmd_e);
 
 /**
  * @brief Sends a data byte to the display.
  *
  * @note This function sends a data byte to the display using the SPI interface, and sets the DC pin to HIGH.
  */
-void ws42_driver_send_data(BYTE);
+void ws42_driver_send_data(uint8_t);
 
 /**
  * @brief Sends a data buffer to the display.
  *
  * @note This function sends a data buffer to the display using the SPI interface, and sets the DC pin to HIGH.
  */
-void ws42_driver_send_data_buffer(BYTE* data, WORD data_length);
+void ws42_driver_send_data_buffer(uint8_t* data, uint16_t data_length);

@@ -22,7 +22,7 @@ static uint8_t init_status = 0x1;
 
 /** Public function declarations */
 
-void max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
+uint8_t max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
   esp_err_t err;
   i2c_master_bus_config_t bus_config = {
     .i2c_port = I2C_NUM_0,
@@ -43,14 +43,15 @@ void max17048_i2c_driver_init(max17048_i2c_driver_config_t dev_config) {
   if (err != ESP_OK) {
     init_status = 0;
     printf("MAX17048 not found at address 0x%02X, disabling this feature!\n", device_config.device_address);
-    return;
+    return ESP_FAIL;
   }
+  return ESP_OK;
 }
 
-BYTE max17048_i2c_driver_get_batt_percent(void) {
+uint8_t max17048_i2c_driver_get_batt_percent(void) {
   esp_err_t err;
-  BYTE raw_percent = 0;
-  BYTE cmd = MAX17048_REG_SOC;
+  uint8_t raw_percent = 0;
+  uint8_t cmd = MAX17048_REG_SOC;
 
   if (init_status == 0) {
     printf("MAX17048 not initialized, cannot get battery percentage.\n");
@@ -68,6 +69,6 @@ BYTE max17048_i2c_driver_get_batt_percent(void) {
    *
    * First we will need to multiply by 100, and then divide by 256.
    */
-  BYTE bat_percent = ((WORD)raw_percent * 100) / 256;
+  uint8_t bat_percent = ((uint16_t)raw_percent * 100) / 256;
   return bat_percent;
 }

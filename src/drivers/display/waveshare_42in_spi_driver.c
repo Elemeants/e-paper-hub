@@ -17,14 +17,14 @@
 /** Init sequence helpers */
 
 typedef struct {
-  BYTE cmd;
-  BYTE data_len;
-  BYTE wait_busy;
+  uint8_t cmd;
+  uint8_t data_len;
+  uint8_t wait_busy;
 
-  BYTE data[16];
+  uint8_t data[16];
 } ws42_driver_init_table_entry_t;
 
-DRAM_ATTR static const ws42_driver_init_table_entry_t _ws42_driver_init_seq[] =
+static const ws42_driver_init_table_entry_t _ws42_driver_init_seq[] =
     {
         {WS42_Driver_CMD_POWER_ON, 0, WAIT_BUSY, {NOTHING}},
         {WS42_Driver_CMD_PANEL_SETTINGS, 1, NOT_WAIT_BUSY, {0x0F}},
@@ -32,7 +32,7 @@ DRAM_ATTR static const ws42_driver_init_table_entry_t _ws42_driver_init_seq[] =
 
 /** Private variables */
 
-static WS42_Driver_Config_t driver_config;
+static ws42_driver_config_t driver_config;
 static spi_device_handle_t screen_spi_handler;
 
 /** Private function declarations */
@@ -84,12 +84,12 @@ static void _ws42_driver_init_gpio(void) {
 }
 
 static void _ws42_driver_exec_init_table(void) {
-  for (BYTE tb_idx = 0; tb_idx < ARRAY_SIZE(_ws42_driver_init_seq); tb_idx++) {
+  for (uint8_t tb_idx = 0; tb_idx < ARRAY_SIZE(_ws42_driver_init_seq); tb_idx++) {
     const ws42_driver_init_table_entry_t entry = _ws42_driver_init_seq[tb_idx];
 
-    ws42_driver_send_command((WS42_Driver_CMD_e)entry.cmd);
+    ws42_driver_send_command((ws42_driver_cmd_e)entry.cmd);
 
-    for (BYTE data_idx = 0; data_idx < entry.data_len; data_idx++) {
+    for (uint8_t data_idx = 0; data_idx < entry.data_len; data_idx++) {
       ws42_driver_send_data(entry.data[data_idx]);
     }
 
@@ -101,7 +101,7 @@ static void _ws42_driver_exec_init_table(void) {
   ws42_driver_wait_busy_ack();
 }
 
-static void _ws42_driver_spi_send_byte(const BYTE data, const BYTE data_command,
+static void _ws42_driver_spi_send_byte(const uint8_t data, const uint8_t data_command,
                                        bool keep_cs_active) {
   esp_err_t error;
   spi_transaction_t t;
@@ -134,7 +134,7 @@ static void _ws42_driver_init_spi_device(void) {
 
 /** Public function declarations */
 
-spi_device_handle_t ws42_driver_init(const WS42_Driver_Config_t config) {
+uint8_t ws42_driver_init(const ws42_driver_config_t config) {
   driver_config = config;
 
   _ws42_driver_init_gpio();
@@ -143,30 +143,7 @@ spi_device_handle_t ws42_driver_init(const WS42_Driver_Config_t config) {
   sleep_ms(1000);
   _ws42_driver_exec_init_table();
 
-  return screen_spi_handler;
-}
-
-void ws42_driver_ops_clear_screen(void) {
-  WORD Width;
-  WORD Height;
-
-  Width = (driver_config.width % 8 == 0) ? (driver_config.width / 8)
-                                         : (driver_config.width / 8 + 1);
-  Height = driver_config.height;
-  BYTE* data_buffer = (BYTE*)malloc(Width * Height);
-
-  ws42_driver_send_command(WS42_Driver_CMD_DATA_BW_START);
-  memset(data_buffer, 0xFF, Width * Height);
-  ws42_driver_send_data_buffer(data_buffer, Width * Height);
-
-  ws42_driver_send_command(WS42_Driver_CMD_DATA_RED_START);
-  memset(data_buffer, 0x00, Width * Height);
-  ws42_driver_send_data_buffer(data_buffer, Width * Height);
-
-  free(data_buffer);
-  ws42_driver_send_command(WS42_Driver_CMD_DISPLAY_REFRESH);
-  sleep_ms(200);
-  ws42_driver_wait_busy_ack();
+  return ESP_OK;
 }
 
 void ws42_driver_hard_reset(void) {
@@ -187,15 +164,15 @@ void ws42_driver_wait_busy_ack() {
   sleep_ms(20);
 }
 
-void ws42_driver_send_command(WS42_Driver_CMD_e cmd) {
-  _ws42_driver_spi_send_byte((const BYTE)cmd, 0, false);
+void ws42_driver_send_command(ws42_driver_cmd_e cmd) {
+  _ws42_driver_spi_send_byte((const uint8_t)cmd, 0, false);
 }
 
-void ws42_driver_send_data(BYTE data) {
+void ws42_driver_send_data(uint8_t data) {
   _ws42_driver_spi_send_byte(data, 1, false);
 }
 
-void ws42_driver_send_data_buffer(BYTE* data, WORD data_length) {
+void ws42_driver_send_data_buffer(uint8_t* data, uint16_t data_length) {
   esp_err_t error;
   spi_transaction_t t;
 

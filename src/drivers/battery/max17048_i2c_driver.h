@@ -63,7 +63,7 @@ typedef enum {
  *
  * @param dev_config Configuration structure containing GPIO pins for I2C communication.
  */
-void max17048_i2c_driver_init(max17048_i2c_driver_config_t user_config);
+uint8_t max17048_i2c_driver_init(max17048_i2c_driver_config_t user_config);
 
 /**
  * @brief Retrieves the battery percentage from the MAX17048 device.
@@ -71,6 +71,6 @@ void max17048_i2c_driver_init(max17048_i2c_driver_config_t user_config);
  * This function reads the state of charge (SOC) register from the MAX17048 device
  * and calculates the battery percentage based on the raw value.
  *
- * @return BYTE Returns the battery percentage as a value between 0 and 100.
+ * @return uint8_t Returns the battery percentage as a value between 0 and 100.
  */
-BYTE max17048_i2c_driver_get_batt_percent(void);
+uint8_t max17048_i2c_driver_get_batt_percent(void);

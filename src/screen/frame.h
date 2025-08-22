@@ -22,9 +22,9 @@
  * This structure holds the pixel data for a single frame, including its width and height.
  */
 typedef struct {
-  BYTE *buffer;
-  WORD width;
-  WORD height;
+  uint8_t *buffer;
+  uint16_t width;
+  uint16_t height;
 } graphics_frame_buffer_t;
 
 /**
@@ -47,7 +47,7 @@ typedef enum {
  * @param height The height of the frame buffer in pixels.
  * @return A `graphics_frame_buffer_t` structure representing the created frame buffer.
  */
-graphics_frame_buffer_t graphics_frame_buffer_create(WORD width, WORD height);
+// graphics_frame_buffer_t graphics_frame_buffer_create(uint16_t width, uint16_t height);
 
 /**
  * @brief Destroys a graphics frame buffer, freeing its allocated memory.
@@ -74,7 +74,7 @@ void graphics_frame_buffer_clear(graphics_frame_buffer_t *frame_buffer, graphics
  * @param y The y-coordinate of the pixel to draw.
  * @param color The color of the pixel to draw.
  */
-void graphics_frame_buffer_draw_pixel(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, graphics_color_e color);
+void graphics_frame_buffer_draw_pixel(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, graphics_color_e color);
 
 /**
  * @brief Draws a line on the frame buffer.
@@ -86,7 +86,7 @@ void graphics_frame_buffer_draw_pixel(graphics_frame_buffer_t *frame_buffer, WOR
  * @param y2 The y-coordinate of the ending point of the line.
  * @param color The color of the line to draw.
  */
-void graphics_frame_buffer_draw_line(graphics_frame_buffer_t *frame_buffer, WORD x1, WORD y1, WORD x2, WORD y2, graphics_color_e color);
+void graphics_frame_buffer_draw_line(graphics_frame_buffer_t *frame_buffer, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, graphics_color_e color);
 
 /**
  * @brief Draws a rectangle on the frame buffer.
@@ -98,7 +98,7 @@ void graphics_frame_buffer_draw_line(graphics_frame_buffer_t *frame_buffer, WORD
  * @param height The height of the rectangle.
  * @param color The color of the rectangle to draw.
  */
-void graphics_frame_buffer_draw_rectangle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD width, WORD height, graphics_color_e color);
+void graphics_frame_buffer_draw_rectangle(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, uint16_t width, uint16_t height, graphics_color_e color);
 
 /**
  * @brief Fills a rectangle on the frame buffer with the specified color.
@@ -110,7 +110,7 @@ void graphics_frame_buffer_draw_rectangle(graphics_frame_buffer_t *frame_buffer,
  * @param height The height of the rectangle.
  * @param color The color to fill the rectangle with.
  */
-void graphics_frame_buffer_fill_rectangle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD width, WORD height, graphics_color_e color);
+void graphics_frame_buffer_fill_rectangle(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, uint16_t width, uint16_t height, graphics_color_e color);
 
 /**
  * @brief Dumps the contents of the frame buffer to the console.
@@ -121,13 +121,13 @@ void graphics_frame_buffer_fill_rectangle(graphics_frame_buffer_t *frame_buffer,
  */
 void dump_graphics_frame_buffer(const graphics_frame_buffer_t *frame_buffer);
 
-void graphics_frame_buffer_draw_text(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, const char *text, graphics_color_e color);
+void graphics_frame_buffer_draw_text(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, const char *text, graphics_color_e color);
 
 void graphics_frame_buffer_draw_bitmap(graphics_frame_buffer_t *frame_buffer,
-                                      WORD x, WORD y,
-                                      const uint8_t *data, WORD width, WORD height,
+                                      uint16_t x, uint16_t y,
+                                      const uint8_t *data, uint16_t width, uint16_t height,
                                       graphics_color_e color);
 
 // TODO: Later implementation
-void graphics_frame_buffer_draw_circle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD radius, graphics_color_e color);
-void graphics_frame_buffer_fill_circle(graphics_frame_buffer_t *frame_buffer, WORD x, WORD y, WORD radius, graphics_color_e color);
+void graphics_frame_buffer_draw_circle(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, uint16_t radius, graphics_color_e color);
+void graphics_frame_buffer_fill_circle(graphics_frame_buffer_t *frame_buffer, uint16_t x, uint16_t y, uint16_t radius, graphics_color_e color);
