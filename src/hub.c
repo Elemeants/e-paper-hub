@@ -96,15 +96,19 @@ void _configure_frame_renderer() {
 }
 
 void _configure_image_loop() {
+  static char full_path[1024];
+
   DIR* d;
   struct dirent* dir;
   struct stat st;
 
+  // Once SD Card is loaded, open the sdcard directory to find images.
   d = opendir(SD_VFS_MOUNTING_POINT);
   if (!d) {
     return;
   }
 
+  // Iterate over the files/folders in the sdcard.
   while ((dir = readdir(d)) != NULL) {
     // Skip . and .. entries
     if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
@@ -112,14 +116,16 @@ void _configure_image_loop() {
     }
 
     // Construct full path to check file type
-    char full_path[1024];
     memset(full_path, 0x00, sizeof(full_path));
     snprintf(full_path, sizeof(full_path), "%s/%s", SD_VFS_MOUNTING_POINT,
              dir->d_name);
 
+    // If the path referes to a File continue.
     if (stat(full_path, &st) == 0 && S_ISREG(st.st_mode)) {
       ESP_LOGI(TAG, "File: %s", dir->d_name);
       const char* dot = strrchr(dir->d_name, '.');
+
+      // If BIN files found, append them to the linked list of images.
       if (dot && (!strcmp(dot, ".BIN") || !strcmp(dot, ".bin"))) {
         ESP_LOGI(TAG, " _append_image_path(%s)", dir->d_name);
         _append_image_path(full_path);
