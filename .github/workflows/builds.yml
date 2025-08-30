@@ -35,4 +35,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: firmware.elf
-          path: example/.pio/build/esp12e/firmware.elf
+          path: .pio/build/esp32doit-devkit-v1/firmware.elf
